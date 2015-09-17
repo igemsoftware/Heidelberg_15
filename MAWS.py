@@ -1159,11 +1159,11 @@ def loop():
         #barrier()
         pos_Nt = pos_Nt_task
         Ntides = []
-	positions = []
+        positions = []
         for elem in pos_Nt:
             Ntides.append(elem[1])
         for elem in pos_Nt:
-	    positions.append(elem[0])
+        positions.append(elem[0])
         print("Chosen sequences are: ")
         for elem in pos_Nt:
             print(elem[1])
@@ -1193,8 +1193,8 @@ parser.add_argument('-b', '--beta', type=float, default=0.01, help='lagrange mul
 parser.add_argument('-i', '--ninit', type=int, default=200, help='number of initial steps as multiple of 100.')
 parser.add_argument('-s', '--nstep', type=int, default = 200, help='number of samples in every step after the first.')
 parser.add_argument('-l', '--nmer', type=int, default = 15, help='The final length of the aptamer.')
-parser.add_argument('-t', '--threshold', type=int, default = 0.01, help='Threshold for candidate selection.')
-parser.add_argument('-f', '--format', type=str, default = "pdb", help='input file format, may be one of pdb or mol2.')
+parser.add_argument('-t', '--threshold', type=float, default = 0.01, help='Threshold for candidate selection.')
+parser.add_argument('-f', '--format', type=str, choices=['pdb', 'mol2'], default = "pdb", help='input file format.')
 parser.add_argument('-y', '--hybrid', type=str, default = "", help='parameter modifying file for hybrid calculations')
 
 
@@ -1207,11 +1207,7 @@ _NSTEP = args.nstep
 _NMER = args.nmer
 _THRESHOLD = args.threshold
 _HYBRID = args.hybrid
-if args.format in ['pdb','mol2']:
-    _FORMAT = args.format
-else:
-    raise ValueError("INVALID FORMAT %s"%args.format)
-    
+_FORMAT = args.format
 
 positions_and_Ntides = loop()
 result(positions_and_Ntides)
