@@ -322,8 +322,8 @@ parser.add_argument('-e', '--energy-threshold', type=float, dest='ENERGY_THRESHO
 parser.add_argument('-m', '--max-energy-difference', type=float, dest='MAX_ENERGY_DIFFERENCE', default=9, help='Maximal energy difference between active and inactive state')
 parser.add_argument('-s', '--stem-length', type=int, dest='STEM_LENGTH', default=10, help='Length of the stem connecting the aptamer to the DNAzyme or ribozyme')
 parser.add_argument('-f', '--shift', type=int, dest='SHIFT', default=7, help='Number of nucleotides to be displaced upon binding of the ligand')
-parser.add_argument('-r', '--params', dest='PARAMS', choices=['dna_matthews1999.par', 'dna_matthews2004.par', 'rna_turner1999.par', 'rna_turner2004.par', 'rna_andronescu2007.par'], default='dna_matthews2004.par', help='ViennaRNA parameter set')
-parser.add_argument('-v', '--vienna-path', dest='VIENNA_PATH', default='/usr/share/ViennaRNA', help='Directory containing ViennaRNA parameter files')
+parser.add_argument('-r', '--params', dest='PARAMS', default='dna_matthews2004.par', help='ViennaRNA parameter set. Can be one of dna_matthews1999.par, dna_matthews2004.par, rna_turner1999.par, rna_turner2004.par, or rna_andronescu2007.par to use one of the parameter sets included with ViennaRNA or a path to a custom parameter set')
+parser.add_argument('-v', '--vienna-path', dest='VIENNA_PATH', default='/usr/share/ViennaRNA', help='Directory containing ViennaRNA parameter files. Required only if using a parameter set included with ViennaRNA')
 
 args = parser.parse_args()
 
@@ -340,7 +340,11 @@ _5PRIME = args.fprime.upper()
 _APTAMER = args.aptamer.upper()
 _3PRIME = args.tprime.upper()
 
-RNA.read_parameter_file(os.path.join(args.VIENNA_PATH, args.PARAMS))
+paramspath = os.path.join(args.VIENNA_PATH, args.PARAMS)
+if not os.path.exists(paramspath):
+    paramspath = args.PARAMS
+
+RNA.read_parameter_file(paramspath)
 
 print _5PRIME 
 print _APTAMER 
