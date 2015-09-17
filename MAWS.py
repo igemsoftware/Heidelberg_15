@@ -1189,13 +1189,13 @@ def result(pos_Nt):
 parser = argparse.ArgumentParser(description='MAWS - Make Aptamers Without SELEX', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('path', metavar='PATH', help='Path to the calculation directory.')
 parser.add_argument('infile', metavar='INFILE', help='3D structure of the ligand.')
-parser.add_argument('-b', '--beta', type=float, default=0.01, help='lagrange multiplier β.')
+parser.add_argument('-b', '--beta', type=float, default=0.01, help='lagrange multiplier beta.')
 parser.add_argument('-i', '--ninit', type=int, default=200, help='number of initial steps as multiple of 100.')
 parser.add_argument('-s', '--nstep', type=int, default = 200, help='number of samples in every step after the first.')
 parser.add_argument('-l', '--nmer', type=int, default = 15, help='The final length of the aptamer.')
 parser.add_argument('-t', '--threshold', type=int, default = 0.01, help='Threshold for candidate selection.')
 parser.add_argument('-f', '--format', type=str, default = "pdb", help='input file format, may be one of pdb or mol2.')
-parser.add_argument('-h', '--hybrid', type=str, default = "", help='parameter modifying file for hybrid calculations')
+parser.add_argument('-y', '--hybrid', type=str, default = "", help='parameter modifying file for hybrid calculations')
 
 
 args = parser.parse_args()
