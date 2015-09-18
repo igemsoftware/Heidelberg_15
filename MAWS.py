@@ -410,7 +410,7 @@ class Aptamer:
         self.process.sendline('source leaprc.gaff')
         self.process.sendline("set default PBradii mbondi2")
         self.process.sendline("ligand = load"+_FORMAT+" "+ligand_mol2_path)
-        if _FORMAT != "":
+        if _HYBRID != "":
 		self.process.sendline("loadamberparams "+_HYBRID)
 	self.geometry = []
         self.position = [0, 0, 0]
