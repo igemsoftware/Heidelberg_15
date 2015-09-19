@@ -4,6 +4,7 @@ import sys
 import os.path
 import random
 import RNA
+import math
 import argparse
 
 def terminal_hairpin(sequence,aptamer,length,shift):
@@ -229,19 +230,32 @@ def prep_sec1_left(seq_five, seq_three, seq_apta, shift):
 
 def prep_sec2_left(seq_five, seq_three, seq_apta, shift, rand):
     (take, dump) = RNA.fold(seq_five+"N"+"C"*100+"N"*4+"G"*100+"N"+seq_three)
-    seq = len(seq_five)*"." +"("*rand+"."*(len(seq_apta)-shift)+")"*(rand)+"."*shift+ len(seq_three)*"."
+    seq = (len(seq_five)-shift)*"." +"("*(rand+shift)+"."*(len(seq_apta)-shift)+")"*(rand)+")"*shift+ len(seq_three)*"."
     return seq
 
 def diff(a, b):
     b = set(b)
     return [aa for aa in a if aa not in b]
     
+def catch0(number):
+    if number == 0:
+        return 1
+    else:
+        return number
+
+def pair_entropy(seq,base_idx):
+    RNA.pf_fold(seq)
+    prob = [[RNA.get_pr(i,j) for i in range(1,len(seq)+1)] for j in range(1,len(seq)+1)]
+    s = sum([-elem*math.log(catch0(elem)) for elem in prob[base_idx]])
+    return s
+
 def full_hairpin_stem(seq_five, seq_three, aptamer, shift, sec1, sec2):
     global _ACTIVE_TOLERANCE
     global _INACTIVE_TOLERANCE
     global _P_THRESHOLD
     global _MAX_ENERGY_DIFFERENCE
     global _ENERGY_THRESHOLD
+    global _ENTROPY
     seq, aseq = full_hairpin(seq_five, seq_three, aptamer, shift)
     seq_ins = seq
     overhang = len(seq_three)
@@ -286,12 +300,14 @@ def full_hairpin_stem(seq_five, seq_three, aptamer, shift, sec1, sec2):
     #else:
     #    corr_shift = 0
     #print pI, pII
-    if (IIexists >= len(sec2_f)-_INACTIVE_TOLERANCE) and (Iexists >= len(sec1_f)-_ACTIVE_TOLERANCE) and (b_free_E < _ENERGY_THRESHOLD):
+    S = sum([pair_entropy(seq,i) for i in range(len(seq))]) 
+    if (IIexists >= len(sec2_f)-_INACTIVE_TOLERANCE) and (Iexists >= len(sec1_f)-_ACTIVE_TOLERANCE) and (b_free_E < _ENERGY_THRESHOLD) and (S < _ENTROPY):
         #pI /= Iexists
         #pII /= IIexists
         if abs(a_free_E-b_free_E) < _MAX_ENERGY_DIFFERENCE:
             print "Free energy active: "+str(a_free_E), "Free energy inactive: "+str(b_free_E), "Free energy difference: "+str(a_free_E-b_free_E)
-            print "Shift: "+str(shift)
+            print "Entropy: "+str(S)
+	    print "Shift: "+str(shift)
             print "Active state base pairs: "+str(Iexists)
             print "Inactive state base pairs: "+str(IIexists)
             print "Sequence: "+str(seq_ins)
@@ -322,8 +338,9 @@ parser.add_argument('-e', '--energy-threshold', type=float, dest='ENERGY_THRESHO
 parser.add_argument('-m', '--max-energy-difference', type=float, dest='MAX_ENERGY_DIFFERENCE', default=9, help='Maximal energy difference between active and inactive state')
 parser.add_argument('-s', '--stem-length', type=int, dest='STEM_LENGTH', default=10, help='Length of the stem connecting the aptamer to the DNAzyme or ribozyme')
 parser.add_argument('-f', '--shift', type=int, dest='SHIFT', default=7, help='Number of nucleotides to be displaced upon binding of the ligand')
-parser.add_argument('-r', '--params', dest='PARAMS', default='dna_matthews2004.par', help='ViennaRNA parameter set. Can be one of dna_matthews1999.par, dna_matthews2004.par, rna_turner1999.par, rna_turner2004.par, or rna_andronescu2007.par to use one of the parameter sets included with ViennaRNA or a path to a custom parameter set')
+parser.add_argument('-r', '--params', dest='PARAMS', default='dna_mathews2004.par', help='ViennaRNA parameter set. Can be one of dna_matthews1999.par, dna_matthews2004.par, rna_turner1999.par, rna_turner2004.par, or rna_andronescu2007.par to use one of the parameter sets included with ViennaRNA or a path to a custom parameter set')
 parser.add_argument('-v', '--vienna-path', dest='VIENNA_PATH', default='/usr/share/ViennaRNA', help='Directory containing ViennaRNA parameter files. Required only if using a parameter set included with ViennaRNA')
+parser.add_argument('-y', '--entropy', type=float, dest='ENTROPY', default=10000)
 
 args = parser.parse_args()
 
@@ -335,6 +352,7 @@ _ENERGY_THRESHOLD = args.ENERGY_THRESHOLD
 _MAX_ENERGY_DIFFERENCE = args.MAX_ENERGY_DIFFERENCE
 _STEM_LENGTH = args.STEM_LENGTH
 _SHIFT = args.SHIFT
+_ENTROPY = args.ENTROPY
 
 _5PRIME = args.fprime.upper()
 _APTAMER = args.aptamer.upper()
